@@ -1,0 +1,21 @@
+import openrouteservice as ors
+import folium 
+from transport_co2 import Mode
+
+client = ors.Client(key = 'API_key')
+map = folium.Map(location=list(reversed([76.889709, 43.238949])), tiles="cartodbpositron", zoom_start=13)
+coords = [[77.01145, 43.346653], [76.95691, 43.233248]]
+route = client.directions(coordinates = coords,
+                          profile = 'driving-car',
+                          format = 'geojson')
+
+routes = client.directions(coords)
+
+folium.PolyLine(locations = [list(reversed(coord)) for  coord in route['features'][0]['geometry']['coordinates']], color = 'blue').add_to(map)
+
+distance = (round(routes['routes'][0]['summary']['distance']/1000,1))
+
+
+small_car = Mode.SMALL_CAR.estimate_co2(distance_in_km=distance)
+large_car = Mode.LARGE_CAR.estimate_co2(distance_in_km=distance)
+print(small_car, large_car)
